@@ -1,14 +1,45 @@
 import java.io.*;
 import java.net.*;
+import java.sql.*;
 import java.util.*;
 
 public class Server {
     private static final int PORT = 8080;
     private static List<ClientHandler> clients = new ArrayList<>();
+    private Connection conexao;
 
     public static void main(String[] args) {
         Server server = new Server();
+        server.conexao = server.conectWithDatabase();
+        if (server.conexao == null){
+            return;
+        }
         server.start();
+    }
+
+    private Connection conectWithDatabase() {
+        try {
+            String url = "jdbc:postgresql://localhost::5432/Chat_Redes";
+            Properties props = new Properties();
+            props.setProperty("user", "postgres");
+            props.setProperty("password", "postgres");
+            props.setProperty("ssl", "true");
+            Connection conn = DriverManager.getConnection(url, props);
+
+            Statement st = conexao.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM ");
+            while (rs.next()) {
+                System.out.print("Column 1 returned ");
+                System.out.println(rs.getString(1));
+            }
+            rs.close();
+            st.close();
+            return conexao;
+        } catch (SQLException e) {
+            // Erro caso haja problemas para se conectar ao banco de dados
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void start() {
