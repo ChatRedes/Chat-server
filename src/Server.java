@@ -19,22 +19,13 @@ public class Server {
 
     private Connection conectWithDatabase() {
         try {
-            String url = "jdbc:postgresql://localhost::5432/Chat_Redes";
+            String url = "jdbc:postgresql://localhost:5432/Chat_Redes";
             Properties props = new Properties();
             props.setProperty("user", "postgres");
             props.setProperty("password", "postgres");
-            props.setProperty("ssl", "true");
             Connection conn = DriverManager.getConnection(url, props);
 
-            Statement st = conexao.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM ");
-            while (rs.next()) {
-                System.out.print("Column 1 returned ");
-                System.out.println(rs.getString(1));
-            }
-            rs.close();
-            st.close();
-            return conexao;
+            return conn;
         } catch (SQLException e) {
             // Erro caso haja problemas para se conectar ao banco de dados
             e.printStackTrace();
@@ -49,6 +40,7 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress());
+                System.out.println("Client socket: " + clientSocket);
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clients.add(clientHandler);
                 Thread thread = new Thread(clientHandler);
