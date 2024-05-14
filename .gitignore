@@ -33,4 +33,4 @@ bin/
 
 *.class
 
-/src/.env
+.env
