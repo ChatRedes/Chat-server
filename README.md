@@ -8,10 +8,6 @@ OBS: O arquivo deve ser criado dentro da pasta principal do projeto, FORA da pas
 
 As operações no banco de dados devem decorrer na seguinte ordem:
 ```java
-
-    rs.close();
-    st.close();
-
   Statement st = bd.createStatement(); // bd é a conexão com o banco de dados
   ResultSet rs = st.executeQuery("Colocar a querie aqui");
 
