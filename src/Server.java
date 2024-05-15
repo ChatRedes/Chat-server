@@ -2,14 +2,17 @@ import java.io.*;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Server {
     private static final int PORT = 8080;
     private static List<ClientHandler> clients = new ArrayList<>();
     private Connection conexao;
+    private Dotenv envVariables;
 
     public static void main(String[] args) {
         Server server = new Server();
+        server.getDotEnv();
         server.conexao = server.conectWithDatabase();
         if (server.conexao == null){
             return;
@@ -17,12 +20,25 @@ public class Server {
         server.start();
     }
 
+    private void getDotEnv() {
+        Dotenv dotenv = Dotenv.load();
+        String env = dotenv.get("testing");
+        System.out.println(env);
+
+        envVariables = dotenv;
+    }
+
     private Connection conectWithDatabase() {
         try {
-            String url = "jdbc:postgresql://localhost:5432/Chat_Redes";
+            String host = envVariables.get("HOST");
+            String port = envVariables.get("PORT");
+            String database = envVariables.get("DATABASE");
+            String url = "jdbc:postgresql://" + host + ":" + port + "/" + database;
+            System.out.println(url);
+
             Properties props = new Properties();
-            props.setProperty("user", "postgres");
-            props.setProperty("password", "postgres");
+            props.setProperty("user", envVariables.get("USER"));
+            props.setProperty("password", envVariables.get("PASSWORD"));
             Connection conn = DriverManager.getConnection(url, props);
 
             return conn;
