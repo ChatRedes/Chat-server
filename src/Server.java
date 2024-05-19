@@ -87,15 +87,15 @@ class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            while (username == "") {
+            while (username.equals("")) {
                 String clientName = reader.readLine();
                 handleRegister(clientName);
             }
 
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
-                System.out.println(clientMessage);
-
+                System.out.println("Chegou aqui");
+                handleMessage(clientMessage);
 //                Server.broadcastMessage(clientMessage); // Broadcast message to all clients
             }
 
@@ -114,16 +114,18 @@ class ClientHandler implements Runnable {
 
     public void sendMessage(String message) {
         writer.println(message);
+        System.out.printf("Sending message to %s: %s\n", username, message);
     }
 
     private void handleRegister(String message) {
         String[] parsedMessage = message.split(" ", 2);
-        String result = "REGISTRO_OK";
+        String result;
 
         if (parsedMessage[0].equals("REGISTRO")) {
 //            if (Register_client.registerClient(parsedMessage[1], clientSocket)) { // registerClient booleano para retornar o sucesso ou falha
 //                sendMessage(result);
-//                username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
+                result = "REGISTRO_OK";
+                username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
 //            }
             sendMessage(result);
             return;
@@ -137,29 +139,40 @@ class ClientHandler implements Runnable {
         String[] parsedMessage = message.split(" ", 2);
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
+            sendMessage("SALAS as salas aqui");
             // verificar se veio sem nenhum parametro adicional na mensagem
+            return;
         }
 
         if (parsedMessage[0].equals("ENTRAR_SALA")) {
-            System.out.println();
+            sendMessage("ENTRAR_SALA_OK");
 //            Client_roommanager.Entrar_sala(parsedMessage[1]); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
             return;
         }
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
+            sendMessage("MENSAGEM " + parsedMessage[1]);
             // função de enviar mensagem deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            return;
         }
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
+            System.out.println("chegou aqui");
+            sendMessage("CRIAR_SALA_OK");
             // função de criar salas deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            return;
         }
 
         if (parsedMessage[0].equals("SAIR_SALA")) {
+            sendMessage("SAIR_SALA_OK");
             // função de sair da sala deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            return;
         }
 
         if (parsedMessage[0].equals("BANIR_USUARIO")) {
+            sendMessage("BANIR_USUARIO_OK");
             // função de banir usuario deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            return;
         }
 
         String result = "ERRO mensagem não reconhecida";
