@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-class Client_Handler implements Runnable {
+public class Client_Handler implements Runnable {
     private final Socket clientSocket;
 
     public Client_Handler(Socket clientSocket) {
@@ -18,13 +18,11 @@ class Client_Handler implements Runnable {
             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
 
             writer.println("Welcome to the server!");
-
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
                 System.out.println("Message from client: " + clientMessage);
                 writer.println("Server received: " + clientMessage);
                 System.out.println("Client connected: " + clientSocket.getChannel());
-
             }
 
             reader.close();
