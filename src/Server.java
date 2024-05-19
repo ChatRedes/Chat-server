@@ -1,3 +1,6 @@
+import Util.DatabaseConfig;
+
+import Services.*;
 
 import java.io.*;
 import java.net.*;
@@ -8,16 +11,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class Server {
     private static final int PORT = 8080;
     private static List<ClientHandler> clients = new ArrayList<>();
-    private Connection conexao;
     private Dotenv envVariables;
 
     public static void main(String[] args) {
         Server server = new Server();
-        server.getDotEnv();
-        server.conexao = server.conectWithDatabase();
-        if (server.conexao == null){
-            return;
-        }
+        DatabaseConfig.StartDatabase();
+
         server.start();
     }
 
@@ -77,6 +76,7 @@ class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final BufferedReader reader;
     private final PrintWriter writer;
+    private String username = "";
 
     public ClientHandler(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
@@ -87,15 +87,16 @@ class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            writer.println("Welcome to the server!");
-
-            String clientName = reader.readLine();
-            System.out.println("Client name: " + clientName);
+            while (username == "") {
+                String clientName = reader.readLine();
+                handleRegister(clientName);
+            }
 
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
                 System.out.println(clientMessage);
-                Server.broadcastMessage(clientMessage); // Broadcast message to all clients
+
+//                Server.broadcastMessage(clientMessage); // Broadcast message to all clients
             }
 
         } catch (IOException e) {
@@ -113,5 +114,55 @@ class ClientHandler implements Runnable {
 
     public void sendMessage(String message) {
         writer.println(message);
+    }
+
+    private void handleRegister(String message) {
+        String[] parsedMessage = message.split(" ", 2);
+        String result = "REGISTRO_OK";
+
+        if (parsedMessage[0].equals("REGISTRO")) {
+//            if (Register_client.registerClient(parsedMessage[1], clientSocket)) { // registerClient booleano para retornar o sucesso ou falha
+//                sendMessage(result);
+//                username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
+//            }
+            sendMessage(result);
+            return;
+        }
+
+        result = "ERRO mensagem não reconhecida ou permissão não concedida";
+        sendMessage(result);
+    }
+
+    private void handleMessage(String message) {
+        String[] parsedMessage = message.split(" ", 2);
+
+        if (parsedMessage[0].equals("LISTAR_SALAS")) {
+            // verificar se veio sem nenhum parametro adicional na mensagem
+        }
+
+        if (parsedMessage[0].equals("ENTRAR_SALA")) {
+            System.out.println();
+//            Client_roommanager.Entrar_sala(parsedMessage[1]); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+            return;
+        }
+
+        if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
+            // função de enviar mensagem deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+        }
+
+        if (parsedMessage[0].equals("CRIAR_SALA")) {
+            // função de criar salas deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+        }
+
+        if (parsedMessage[0].equals("SAIR_SALA")) {
+            // função de sair da sala deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+        }
+
+        if (parsedMessage[0].equals("BANIR_USUARIO")) {
+            // função de banir usuario deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+        }
+
+        String result = "ERRO mensagem não reconhecida";
+        sendMessage(result);
     }
 }
