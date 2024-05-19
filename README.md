@@ -8,15 +8,17 @@ OBS: Para utilização da biblioteca Dotenv é necessário abrir a aba "dependen
 
 As operações no banco de dados devem decorrer na seguinte ordem:
 ```java
-  Statement st = bd.createStatement(); // bd é a conexão com o banco de dados
-  ResultSet rs = st.executeQuery("Colocar a querie aqui");
+public class Model {
+    Statement st = bd.createStatement(); // bd é a conexão com o banco de dados
+    ResultSet rs = st.executeQuery("Colocar a querie aqui");
 
-  // Aqui vai as operações com o resultado. O resultado estará em rs, portanto caso queira escrever o resultado de um select, por exemplo, o código abaixo servirá. buscar resultado de uma operação como insert ou update não ira retornar um resultado.
+    // Aqui vai as operações com o resultado. O resultado estará em rs, portanto caso queira escrever o resultado de um select, por exemplo, o código abaixo servirá. buscar resultado de uma operação como insert ou update não ira retornar um resultado.
     while (rs.next()) {
         System.out.println(rs.getString(1)); // Onde 1 é a coluna sendo lida
     }
-  // Fim do código exemplo
-            
-  rs.close();
-  st.close();
+    // Fim do código exemplo
+    
+    rs.close();
+    st.close();
+}
 ```
