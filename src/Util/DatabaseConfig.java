@@ -74,21 +74,21 @@ public class DatabaseConfig {
 
     private static void createClient() throws SQLException {
         Connection conn = getConnection();
-        String query = "CREATE TABLE IF NOT EXISTS CLIENT (username TEXT PRIMARY KEY, socket TEXT NOT NULL)";
+        String query = "CREATE TABLE IF NOT EXISTS CLIENT (id_client SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, socket VARCHAR(255) UNIQUE;";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
     }
 
     private static void createRoom() throws SQLException {
         Connection conn = getConnection();
-        String query = "CREATE TABLE IF NOT EXISTS ROOM (room_name TEXT PRIMARY KEY, admin TEXT REFERENCES CLIENT(username))";
+        String query = "CREATE TABLE IF NOT EXISTS CHAT (id_chat SERIAL PRIMARY KEY, room_name VARCHAR(255) UNIQUE, administrador VARCHAR(255) REFERENCES CLIENT(username), senha TEXT);";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
     }
 
     private static void createClient_Room() throws SQLException {
         Connection conn = getConnection();
-        String query = "CREATE TABLE IF NOT EXISTS CLIENT_ROOM (id SERIAL PRIMARY KEY, client TEXT REFERENCES CLIENT(username), room TEXT REFERENCES ROOM(room_name))";
+        String query = "CREATE TABLE IF NOT EXISTS CLIENT_CHAT (id_cliente_room SERIAL PRIMARY KEY, username VARCHAR(255) REFERENCES CLIENT(username), room_name TEXT REFERENCES CHAT(room_name));";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
     }

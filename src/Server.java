@@ -146,7 +146,7 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("ENTRAR_SALA")) {
             sendMessage("ENTRAR_SALA_OK");
-//            Client_roommanager.Entrar_sala(parsedMessage[1]); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+            Client_roommanager.Entrada_sala(parsedMessage[1], parsedMessage[2]); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
             return;
         }
 
@@ -157,7 +157,6 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
-            System.out.println("chegou aqui");
             sendMessage("CRIAR_SALA_OK");
             // função de criar salas deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
             return;
