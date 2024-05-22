@@ -71,7 +71,7 @@ public class DatabaseConfig {
 
     private static void createClient() throws SQLException {
         Connection conn = getConnection();
-        String query = "CREATE TABLE IF NOT EXISTS CLIENT (id_client SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, socket VARCHAR(255) UNIQUE;";
+        String query = "CREATE TABLE IF NOT EXISTS CLIENT (id_client SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE, socket VARCHAR(255) UNIQUE);";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
     }
