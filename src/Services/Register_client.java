@@ -16,7 +16,7 @@ public class Register_client {
             Connection conn = DatabaseConfig.getConnection();
             String CreateQueryClient = "INSERT INTO CLIENT (username, socket) VALUES ('" + username + "', '" + socket + "');";
             Statement stmt = conn.createStatement();
-            stmt.executeQuery(CreateQueryClient);
+            stmt.executeUpdate(CreateQueryClient);
             return "REGISTRO_OK";
 
         } catch (SQLException e) {
@@ -25,7 +25,7 @@ public class Register_client {
         }
     }
 
-    private Client select_query(String username) {
+    private static Client select_query(String username) {
         try {
             Connection conn = DatabaseConfig.getConnection();
             String SelectQueryClient = "SELECT * FROM CLIENT WHERE username = '" + username + "';";
