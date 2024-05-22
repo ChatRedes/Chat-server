@@ -118,15 +118,18 @@ class ClientHandler implements Runnable {
     }
 
     private void handleRegister(String message) {
-        String[] parsedMessage = message.split(" ", 2);
+        String[] parsedMessage = message.split(" ");
         String result;
 
+        if (parsedMessage.length != 2) {
+            sendMessage("ERRO Numero de parametros enviados incorretos");
+            return;
+        }
+
         if (parsedMessage[0].equals("REGISTRO")) {
-//            if (Register_client.registerClient(parsedMessage[1], clientSocket)) { // registerClient booleano para retornar o sucesso ou falha
-//                sendMessage(result);
-                result = "REGISTRO_OK";
-                username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
-//            }
+            String username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
+            result = Register_client.insertClient(username, this.clientSocket);
+
             sendMessage(result);
             return;
         }
