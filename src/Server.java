@@ -56,8 +56,10 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
+                System.out.println("Client Found: " + clientSocket);
                 clients.add(clientHandler);
                 Thread thread = new Thread(clientHandler);
+                System.out.println("Starting thread");
                 thread.start();
             }
         } catch (IOException e) {
@@ -86,10 +88,12 @@ class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            writer.println("Welcome to the server!");
-
             String clientName = reader.readLine();
-            System.out.println("Client name: " + clientName);
+            System.out.println("teste");
+            String[] userRequest = clientName.split(" ", 2);
+            String username = userRequest[1];
+            System.out.println("Client name: " + username);
+            writer.println("REGISTRO_OK");
 
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
