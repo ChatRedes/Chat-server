@@ -1,10 +1,7 @@
 package Util;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
 
-import javax.sql.DataSource;
 import java.sql.*;
 
 public class DatabaseConfig {

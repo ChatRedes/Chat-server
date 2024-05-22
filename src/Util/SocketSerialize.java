@@ -10,7 +10,6 @@ public class SocketSerialize {
         return address.getHostAddress() + ":" + port;
     }
 
-    // Deserialize String and recreate Socket
     public static Socket deserializeSocket(String serializedSocket) throws IOException {
         String[] parts = serializedSocket.split(":");
         String ipAddress = parts[0];
