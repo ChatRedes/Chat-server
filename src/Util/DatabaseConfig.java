@@ -78,7 +78,7 @@ public class DatabaseConfig {
 
     private static void createRoom() throws SQLException {
         Connection conn = getConnection();
-        String query = "CREATE TABLE IF NOT EXISTS CHAT (id_chat SERIAL PRIMARY KEY, room_name VARCHAR(255) UNIQUE, administrador VARCHAR(255) REFERENCES CLIENT(username), senha TEXT);";
+        String query = "CREATE TABLE IF NOT EXISTS CHAT (id_chat SERIAL PRIMARY KEY, room_name VARCHAR(255) UNIQUE, administrador VARCHAR(255) REFERENCES CLIENT(username), isPrivate BOOLEAN UNIQUE, senha TEXT);";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
     }

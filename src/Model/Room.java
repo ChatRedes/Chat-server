@@ -7,9 +7,10 @@ public class Room {
     private Boolean isPrivate;
     private String passhash;
 
-    public Room(int id, String name, Boolean isPrivate, String passhash) {
+    public Room(int id, String name, String admin, Boolean isPrivate, String passhash) {
         this.id = id;
         this.name = name;
+        this.admin = admin;
         this.isPrivate = isPrivate;
         this.passhash = passhash;
     }
