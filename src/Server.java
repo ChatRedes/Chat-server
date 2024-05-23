@@ -142,38 +142,83 @@ class ClientHandler implements Runnable {
         String[] parsedMessage = message.split(" ", 2);
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
-            sendMessage("SALAS as salas aqui");
-            // verificar se veio sem nenhum parametro adicional na mensagem
+            try {
+                Client_roommanager.Listar_salas();
+            } catch (Exception e) {
+                sendMessage("ERRO: não listou");
+            }
             return;
         }
 
         if (parsedMessage[0].equals("ENTRAR_SALA")) {
-            sendMessage("ENTRAR_SALA_OK");
-            Client_roommanager.Entrada_sala(parsedMessage[1], parsedMessage[2]); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+            try {
+                String roomName = parsedMessage[1];
+                String password = null;
+
+                if (parsedMessage.length > 2) {
+                    password = parsedMessage[2];
+                }
+
+                Client_roommanager.Entrada_sala(this.username, roomName, password);
+                sendMessage("ENTRAR_SALA_OK");
+            } catch (Exception e) {
+                sendMessage("erro");
+            }
             return;
         }
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
             sendMessage("MENSAGEM " + parsedMessage[1]);
             // função de enviar mensagem deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            //como verificar se a sala existe e quem está na sala antes de enviar a mensagem?
             return;
         }
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
-            sendMessage("CRIAR_SALA_OK");
-            // função de criar salas deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            try {
+                String roomName = parsedMessage[1];
+                String username = this.username;
+                String password = null;
+
+                if (parsedMessage.length == 3) {
+                    password = parsedMessage[2];
+                }
+
+                if (password == null) {
+                    Client_roommanager.Criar_sala(username, roomName);
+                } else {
+                    Client_roommanager.Criar_sala_s(username, roomName, password);
+                }
+
+                sendMessage("CRIAR_SALA_OK");
+            } catch (Exception e) {
+                sendMessage("já é 22:32 e nem sei mais oq eu to fazendo");
+            }
             return;
         }
 
         if (parsedMessage[0].equals("SAIR_SALA")) {
-            sendMessage("SAIR_SALA_OK");
-            // função de sair da sala deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            try {
+                String roomName = parsedMessage[1];
+                String username = this.username;
+                Client_roommanager.Saida_sala(username, roomName);
+                sendMessage("SAIR_SALA_OK");
+            } catch (Exception e) {
+                sendMessage("deu ruim");
+            }
             return;
         }
 
         if (parsedMessage[0].equals("BANIR_USUARIO")) {
-            sendMessage("BANIR_USUARIO_OK");
-            // função de banir usuario deve tratar os deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
+            try {
+                String roomName = parsedMessage[1];
+                String usernameToBan = parsedMessage[2];
+                String usernameAdmin = this.username;
+                Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
+                sendMessage("BANIR_USUARIO_OK");
+            } catch (Exception e) {
+                sendMessage("deu ruim");
+            }
             return;
         }
 
