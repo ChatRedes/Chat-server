@@ -185,9 +185,9 @@ class ClientHandler implements Runnable {
                 }
 
                 if (password == null) {
-                    Client_roommanager.Criar_sala(username, roomName);
+                    Client_roommanager.Criar_sala(username, roomName, null);
                 } else {
-                    Client_roommanager.Criar_sala_s(username, roomName, password);
+                    Client_roommanager.Criar_sala(username, roomName, password);
                 }
 
                 sendMessage("CRIAR_SALA_OK");
