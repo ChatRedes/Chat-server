@@ -151,26 +151,20 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("ENTRAR_SALA")) {
-            try {
-                String roomName = parsedMessage[1];
-                String password = null;
-
-                if (parsedMessage.length > 2) {
-                    password = parsedMessage[2];
-                }
-
-                Client_roommanager.Entrada_sala(this.username, roomName, password);
-                sendMessage("ENTRAR_SALA_OK");
-            } catch (Exception e) {
-                sendMessage("erro");
+            String roomname = parsedMessage[2];
+            String password = null;
+            if (parsedMessage.length > 3)
+            {
+                password = parsedMessage[3];
             }
+            Client_roommanager.Entrada_sala(username, roomname, password); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+            sendMessage("ENTRAR_SALA_OK");
             return;
         }
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
             sendMessage("MENSAGEM " + parsedMessage[1]);
             // função de enviar mensagem deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
-            //como verificar se a sala existe e quem está na sala antes de enviar a mensagem?
             return;
         }
 
