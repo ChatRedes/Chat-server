@@ -10,7 +10,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class Server {
     private static final int PORT = 8080;
-    private static List<ClientHandler> clients = new ArrayList<>();
+    static List<ClientHandler> clients = new ArrayList<>();
     private Dotenv envVariables;
 
     public static void main(String[] args) {
@@ -173,10 +173,21 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
-            sendMessage("MENSAGEM " + parsedMessage[1]);
-            // função de enviar mensagem deve tratar os possiveis erros no corpo do parametro bem como outros possiveis erros
-            return;
+//            try {
+//                String roomName = parsedMessage[1];
+//                String messageContent = parsedMessage[2];
+//                List<String> participants = Messages_handler.pegar_os_participantes(roomName);
+//                for (ClientHandler client : Server.clients) {
+//                    if (participants.contains(client.getUsername())) {
+//                        client.sendMessage(messageContent);
+//                    }
+//                }
+//            } catch (Exception e) {
+//                sendMessage("erro");
+//            }
+//            return;
         }
+
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
             try {

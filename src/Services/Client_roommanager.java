@@ -66,25 +66,31 @@ public class Client_roommanager {
                         stmt.executeUpdate(insertQuery);
                         return "ENTRAR_SALA_OK";
                     }
+
                     String equal = rs.getString("senha");
                     if (senha == null) {
+                        return "ERRO Senha para esta sala é obrigatoria";
+                    }
 
-                    }
                     if (!equal.equals(senha)) {
-                        System.out.println("ERRO: Senha incorreta");
-                    } else {
-                        stmt.executeUpdate(insertQuery);
+                        return"ERRO Senha incorreta";
                     }
-                } else {
-                    System.out.println("ERRO: Sala não existe");
+
+                    stmt.executeUpdate(insertQuery);
+                    return "ENTRAR_SALA_OK";
+
                 }
+
+                return "ERRO Sala não existe";
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return "ERRO Ocorreu um erro na entrada de sala";
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return "ERRO Ocorreu um erro na entrada de sala";
         }
     }
+
     public static void Saida_sala (String username, String room_name){
         String deletQuery;
         try {
