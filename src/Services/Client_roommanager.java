@@ -35,21 +35,6 @@ public class Client_roommanager {
             }
     }
 
-        public static void Criar_sala(String username, String room_name) {
-        try {
-            Connection adminConn = DatabaseConfig.getConnection();
-            String CreateQueryChat = "INSERT INTO CHAT (room_name, adminstrador) VALUES ('" + room_name + "', '" + username + "');";
-            String CreateQueryIntermed = "INSERT INTO CLIENT_ROOM(username, room_name) VALUES ('" + username + "', '" + room_name + "');";
-
-            Statement stmt = adminConn.createStatement();
-            stmt.executeQuery(CreateQueryChat);
-            stmt.executeQuery(CreateQueryIntermed);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void Criar_sala(String username, String room_name, String senha) {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
@@ -65,19 +50,6 @@ public class Client_roommanager {
             e.printStackTrace();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public static void Entrada_sala(String username, String room_name) {
-        try {
-            Connection adminConn = DatabaseConfig.getConnection();
-            String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('"+ username + "', '" + room_name + "');";
-            Statement stmt = adminConn.createStatement();
-            stmt.executeQuery(insertQuery);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("ERRO: Sala não existe");
         }
     }
 
