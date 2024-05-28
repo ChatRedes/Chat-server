@@ -96,13 +96,14 @@ class ClientHandler implements Runnable {
             while ((clientMessage = reader.readLine()) != null) {
                 System.out.println("Chegou aqui");
                 handleMessage(clientMessage);
-//                Server.broadcastMessage(clientMessage); // Broadcast message to all clients
             }
+            System.out.println("Client disconnected");
 
         } catch (IOException e) {
             System.err.println("Error handling client connection: " + e.getMessage());
         } finally {
             try {
+                System.out.println("Closing connection");
                 reader.close();
                 writer.close();
                 clientSocket.close();
@@ -127,11 +128,18 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("REGISTRO")) {
-            String username = parsedMessage[1]; // salva o nome do usuario no handler caso consiga salvar o nome do usuario
-            result = Register_client.insertClient(username, this.clientSocket);
-
-            sendMessage(result);
-            return;
+            try
+            {
+                result = Register_client.insertClient(parsedMessage[1], this.clientSocket);
+                sendMessage(result);
+                if (result.equals("REGISTRO_OK")) {
+                    username = parsedMessage[1];
+                }
+                return;
+            } catch (Exception e)
+            {
+                sendMessage("ERRO Ocorreu um erro ao registrar o cliente");
+            }
         }
 
         result = "ERRO mensagem não reconhecida ou permissão não concedida";
@@ -139,6 +147,7 @@ class ClientHandler implements Runnable {
     }
 
     private void handleMessage(String message) {
+        System.out.println("Mensagem recebida: " + message);
         String[] parsedMessage = message.split(" ", 2);
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
@@ -151,11 +160,12 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("ENTRAR_SALA")) {
-            String roomname = parsedMessage[2];
+            String[] params = parsedMessage[1].split(" ");
+            String roomname = params[0];
             String password = null;
-            if (parsedMessage.length > 3)
+            if (params.length == 2)
             {
-                password = parsedMessage[3];
+                password = params[1];
             }
             Client_roommanager.Entrada_sala(username, roomname, password); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
             sendMessage("ENTRAR_SALA_OK");
@@ -170,22 +180,28 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
             try {
-                String roomName = parsedMessage[1];
+                String[] paramethers = parsedMessage[1].split(" ", 2);
+                String roomName = paramethers[1];
+                System.out.println("Criando sala " + roomName);
                 String username = this.username;
+                String privacidade = paramethers[0];
                 String password = null;
+                boolean isPrivate = false;
 
-                if (parsedMessage.length == 3) {
-                    password = parsedMessage[2];
+                if (privacidade.equals("PRIVADA"))
+                {
+                    isPrivate = true;
                 }
 
-                if (password == null) {
-                    Client_roommanager.Criar_sala(username, roomName, null);
-                } else {
-                    Client_roommanager.Criar_sala(username, roomName, password);
+                if (paramethers.length > 2) {
+                    password = paramethers[2];
                 }
+
+                Client_roommanager.Criar_sala(username, roomName, password, isPrivate);
 
                 sendMessage("CRIAR_SALA_OK");
             } catch (Exception e) {
+                System.err.println(e);
                 sendMessage("já é 22:32 e nem sei mais oq eu to fazendo");
             }
             return;

@@ -22,7 +22,7 @@ public class Client_roommanager {
     public static void Listar_salas() {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            String salas = "SELECT room_name FROM CHAT;";
+            String salas = "SELECT room_name FROM chat;";
             Statement stmt = adminConn.createStatement();
             ResultSet rs = stmt.executeQuery(salas);
 
@@ -35,16 +35,14 @@ public class Client_roommanager {
             }
     }
 
-    public static void Criar_sala(String username, String room_name, String senha) {
+    public static void Criar_sala(String username, String room_name, String senha, boolean isPrivate) {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            senha = gerarHash(senha);
-            String CreateQueryChat = "INSERT INTO CHAT (room_name, adminstrador, senha) VALUES ('" + room_name + "', '" + username + "' ,'"+ senha + "');";
-            String CreateQueryIntermed = "INSERT INTO CLIENT_ROOM(username, room_name) VALUES ('" + username + "', '" + room_name + "');";
-
             Statement stmt = adminConn.createStatement();
-            stmt.executeQuery(CreateQueryChat);
-            stmt.executeQuery(CreateQueryIntermed);
+            String CreateQueryChat = "INSERT INTO chat (room_name, administrador, senha, isPrivate) VALUES ('" + room_name + "', '" + username + "' ,'"+ senha + "', " + isPrivate + " );";
+            stmt.executeUpdate(CreateQueryChat);
+            String CreateQueryIntermed = "INSERT INTO client_room (username, room_name) VALUES ('" + username + "', '" + room_name + "');";
+            stmt.executeUpdate(CreateQueryIntermed);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -53,23 +51,31 @@ public class Client_roommanager {
         }
     }
 
-    public static void Entrada_sala(String username, String room_name, String senha) {
+    public static String Entrada_sala(String username, String room_name, String senha) {
         String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('"+ username + "', '" + room_name + "');";
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            senha = gerarHash(senha);
             String SenhaEqual = "SELECT senha FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(SenhaEqual)) {
 
                 if (rs.next()) {
+                    boolean isPrivate = rs.getBoolean("isPrivate");
+
+                    if (!isPrivate) {
+                        stmt.executeUpdate(insertQuery);
+                        return "ENTRAR_SALA_OK";
+                    }
                     String equal = rs.getString("senha");
+                    if (senha == null) {
+
+                    }
                     if (!equal.equals(senha)) {
                         System.out.println("ERRO: Senha incorreta");
                     } else {
-                        stmt.executeQuery(insertQuery);
+                        stmt.executeUpdate(insertQuery);
                     }
-                }else{
+                } else {
                     System.out.println("ERRO: Sala não existe");
                 }
             }
@@ -95,7 +101,7 @@ public class Client_roommanager {
                     } else {
                         deletQuery = "DELETE CASCADE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
                     }
-                    stmt.executeQuery(deletQuery);
+                    stmt.executeUpdate(deletQuery);
                 }
             }
         } catch (SQLException e) {
