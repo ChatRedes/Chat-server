@@ -180,7 +180,8 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
             try {
-                Client_roommanager.Listar_salas();
+                String salas = Client_roommanager.Listar_salas();
+                sendMessage("SALAS " + salas);
             } catch (Exception e) {
                 sendMessage("ERRO: não listou");
             }
@@ -191,12 +192,19 @@ class ClientHandler implements Runnable {
             String[] params = parsedMessage[1].split(" ");
             String roomname = params[0];
             String password = null;
-            if (params.length == 2)
-            {
+            if (params.length == 2) {
                 password = params[1];
             }
-            Client_roommanager.Entrada_sala(username, roomname, password); // função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
-            sendMessage("ENTRAR_SALA_OK");
+            String result = Client_roommanager.Entrada_sala(username, roomname, password);
+            String messageContentO = "ENTROU " + roomname + " " + username + " ";
+            List<String> participantes = Messages_handler.pegar_os_participantes(roomname);
+            for (ClientHandler client : Server.clients) {
+                if (participantes.contains(username)) {
+                    client.sendMessage(messageContentO);
+                }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+
+            }
+            sendMessage(result);
             return;
         }
 
@@ -205,7 +213,7 @@ class ClientHandler implements Runnable {
                 String[] vamo = parsedMessage[1].split(" ",2);
                 System.out.println(parsedMessage[1]);
                 String roomName = vamo[0];
-                String messageContent = vamo[1];
+                String messageContent = "MENSAGEM " + roomName + " " + username + " "  + vamo[1];
                 List<String> participants = Messages_handler.pegar_os_participantes(roomName);
                 for (ClientHandler client : Server.clients) {
                     if (participants.contains(username)) {
@@ -238,9 +246,9 @@ class ClientHandler implements Runnable {
                     password = paramethers[2];
                 }
 
-                Client_roommanager.Criar_sala(username, roomName, password, isPrivate);
+                String result = Client_roommanager.Criar_sala(username, roomName, password, isPrivate);
 
-                sendMessage("CRIAR_SALA_OK");
+                sendMessage(result);
             } catch (Exception e) {
                 System.err.println(e);
                 sendMessage("ERRO Problema ao criar sala");
@@ -252,8 +260,17 @@ class ClientHandler implements Runnable {
             try {
                 String roomName = parsedMessage[1];
                 String username = this.username;
-                Client_roommanager.Saida_sala(username, roomName);
-                sendMessage("SAIR_SALA_OK");
+                String messageContenti = "SAIU " + roomName + " " + username;
+                List<String> participantes = Messages_handler.pegar_os_participantes(roomName);
+                for (ClientHandler client : Server.clients) {
+                    if (participantes.contains(username)) {
+                        client.sendMessage(messageContenti);
+                    }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+                }
+                String saiu = Client_roommanager.Saida_sala(username, roomName);
+                sendMessage(saiu);
+
+                return;
             } catch (Exception e) {
                 sendMessage("deu ruim");
             }

@@ -30,7 +30,7 @@ public class Messages_handler {
             List<String> participants = new ArrayList<>();
             try {
                 Connection adminConn = DatabaseConfig.getConnection();
-                String usernamesQuery = "SELECT username FROM CHAT WHERE ROOM_NAME = '" + roomName + "';";
+                String usernamesQuery = "SELECT username FROM CLIENT_ROOM WHERE ROOM_NAME = ?";
                 PreparedStatement stmt = adminConn.prepareStatement(usernamesQuery);
                 stmt.setString(1, roomName);
                 ResultSet rs = stmt.executeQuery();
