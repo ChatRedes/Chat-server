@@ -23,7 +23,7 @@ public class Client_roommanager {
                 String roomName = rs.getString("room_name");
                 salasString.append(" ").append(roomName);
             }
-        } catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return salasString.toString();
@@ -33,7 +33,7 @@ public class Client_roommanager {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
             Statement stmt = adminConn.createStatement();
-            String CreateQueryChat = "INSERT INTO chat (room_name, administrador, senha, isPrivate) VALUES ('" + room_name + "', '" + username + "' ,'"+ senha + "', " + isPrivate + " );";
+            String CreateQueryChat = "INSERT INTO chat (room_name, administrador, senha, isPrivate) VALUES ('" + room_name + "', '" + username + "' ,'" + senha + "', " + isPrivate + " );";
             stmt.executeUpdate(CreateQueryChat);
             String CreateQueryIntermed = "INSERT INTO client_room (username, room_name) VALUES ('" + username + "', '" + room_name + "');";
             stmt.executeUpdate(CreateQueryIntermed);
@@ -46,7 +46,7 @@ public class Client_roommanager {
     }
 
     public static String Entrada_sala(String username, String room_name, String senha) {
-        String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('"+ username + "', '" + room_name + "');";
+        String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('" + username + "', '" + room_name + "');";
         try {
             Connection adminConn = DatabaseConfig.getConnection();
             String SenhaEqual = "SELECT senha, isprivate FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
@@ -65,7 +65,7 @@ public class Client_roommanager {
                             String user = rss.getString("room_name");
                             Listusuarios.add(user);
                             return "ENTRAR_SALA_OK" + Listusuarios;
-                        }catch (SQLException e) {
+                        } catch (SQLException e) {
                             e.printStackTrace();
                             return "ERRO Ocorreu um erro na entrada de sala";
                         }
@@ -77,7 +77,7 @@ public class Client_roommanager {
                     }
 
                     if (!equal.equals(senha)) {
-                        return"ERRO Senha incorreta";
+                        return "ERRO Senha incorreta";
                     }
 
                     stmt.executeUpdate(insertQuery);
@@ -101,7 +101,7 @@ public class Client_roommanager {
         }
     }
 
-    public static String Saida_sala (String username, String room_name){
+    public static String Saida_sala(String username, String room_name) {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
             String salaexist = "SELECT room_name FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
@@ -110,8 +110,8 @@ public class Client_roommanager {
                  ResultSet rs = stmt.executeQuery(salaexist)) {
 
                 if (rs.next()) {
-                    try (Statement stmtt= adminConn.createStatement();
-                         ResultSet rss = stmtt.executeQuery(isadmin)){
+                    try (Statement stmtt = adminConn.createStatement();
+                         ResultSet rss = stmtt.executeQuery(isadmin)) {
                         if (rss.next()) {
                             String admin = rs.getString("administrador");
                             if (!admin.equals(username)) {
@@ -119,8 +119,10 @@ public class Client_roommanager {
                                 stmt.executeUpdate(deletQuery);
                                 return "SAIR_SALA_OK";
                             } else {
-                                String deletQuery = "DELETE CASCADE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                                String deletQuery = "DELETE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                                String deletclient = "DELETE FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
                                 stmt.executeUpdate(deletQuery);
+                                stmt.executeUpdate(deletclient);
                                 return "FECHAR_SALA_OK";
                             }
                         }
@@ -135,7 +137,7 @@ public class Client_roommanager {
         return "ERRO";
     }
 
-    public static String bane_user(String username_admin, String room_name, String username){
+    public static String bane_user(String username_admin, String room_name, String username) {
         String deletQuery;
         try {
             Connection adminConn = DatabaseConfig.getConnection();
@@ -143,7 +145,7 @@ public class Client_roommanager {
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(isIn)) {
 
-                if(rs.next()){
+                if (rs.next()) {
 
                     String isadmin = "SELECT administrador FROM CHAT WHERE USERNAME = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
 
@@ -161,10 +163,38 @@ public class Client_roommanager {
                             }
                         }
                     }
-                } else{
+                } else {
                     return "ERRO USUARIO NÃO ESTÁ NA SALA";
-                }}}catch (SQLException e) {
+                }
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return "ERRO Desconhecido";
-    }}
+    }
+
+    public static void remove_user_database(String username) throws SQLException {
+        try {
+            Connection adminConn = DatabaseConfig.getConnection();
+
+            String deletClient = "DELETE FROM CLIENT WHERE USERNAME = '" + username + "';";
+            String deletCR = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "';";
+            String adm = "SELECT administrador FROM CHAT WHERE administrador = '" + username + "';";
+
+            Statement stmt = adminConn.createStatement();
+
+            try (ResultSet rs = stmt.executeQuery(adm)) {
+                while (rs.next()) {
+                    String sala = rs.getString("room_name");
+                    Saida_sala(username, sala);
+                }
+                stmt.executeUpdate(deletCR);
+                stmt.executeUpdate(deletClient);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
