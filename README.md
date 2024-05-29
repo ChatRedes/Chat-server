@@ -62,7 +62,7 @@ salas privadas, o campo senha é obrigatório)
 <nome_do_remetente> <mensagem>
 * Servidor para Cliente (Erro, sala não existe, por exemplo):
 ### ERRO <mensagem_de_erro>
-Fechar uma sala
+### Fechar uma sala
 * O administrador da sala envia uma mensagem ao servidor
 solicitando o fechamento da sala.
 * O servidor confirma o fechamento da sala para o administrador
