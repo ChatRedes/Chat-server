@@ -31,30 +31,33 @@ public class Authenticator {
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
             byte[] authRequestBytes = Base64.getDecoder().decode(simetricKey);
-            byte[] aesKeyBytes = cipher.doFinal(authRequestBytes);
 
+            byte[] aesKeyBytes = cipher.doFinal(authRequestBytes);
             String sKeyMessage = new String(aesKeyBytes);
             String[] parsedKey = sKeyMessage.split(" ");
 
+            System.out.println(sKeyMessage);
             if (parsedKey.length != 2) {
+                System.out.println("Tamanho incorreto: " + simetricKey);
                 return false;
             }
 
             if (!parsedKey[0].equals("CHAVE_SIMETRICA")) {
+                System.err.println("Request incorreto: " +sKeyMessage);
                 return false;
             }
 
-            byte[] key = parsedKey[1].getBytes();
-            byte[] decodedKey = Base64.getDecoder().decode(key);
+            byte[] decodedKey = Base64.getDecoder().decode(parsedKey[1]);
             this.aesKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             return true;
+            
         }catch(Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public String DecryptMessage(String message) throws Exception {
+    public String DecryptMessage(String message) {
         try {
             byte[] messageBytes = Base64.getDecoder().decode(message);
             Cipher cipher = Cipher.getInstance("AES");
@@ -63,16 +66,23 @@ public class Authenticator {
             return new String(decryptedMessageBytes);
         } catch (Exception e) {
             e.printStackTrace();
-            return "ERRO: Falha ao desencripitar a mensagem";
+            return "ERRO Falha ao decripitar a mensagem";
+
         }
     }
 
-    public String EncryptMessage(String message) throws Exception {
-        Cipher cif = Cipher.getInstance("AES");
-        cif.init(Cipher.ENCRYPT_MODE, this.aesKey);
+    public String EncryptMessage(String message) {
+        try {
+            Cipher cif = Cipher.getInstance("AES");
+            cif.init(Cipher.ENCRYPT_MODE, this.aesKey);
 
-        byte[] buffer = cif.doFinal(message.getBytes());
-        String messageToSend = Base64.getEncoder().encodeToString(buffer);
-        return messageToSend;
+            byte[] buffer = cif.doFinal(message.getBytes());
+            String encryptedMessage = Base64.getEncoder().encodeToString(buffer);
+
+            return encryptedMessage;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERRO erro ao enviar mensagem";
+        }
     }
 }

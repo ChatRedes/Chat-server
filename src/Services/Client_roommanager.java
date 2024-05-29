@@ -2,37 +2,27 @@ package Services;
 
 import Util.DatabaseConfig;
 
-import java.security.MessageDigest;
 import java.sql.*;
-import Util.*;
-
+import java.util.ArrayList;
+import java.util.List;
 public class Client_roommanager {
 
-    public static String gerarHash(String senha) throws Exception {
-        MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
-        byte hash[] = algorithm.digest(senha.getBytes("UTF-8"));
-
-        StringBuilder texto = new StringBuilder();
-        for (byte b : hash) {
-            texto.append(String.format("%02X", 0xFF & b));
-        }
-        return texto.toString();
-    }
-
-    public static void Listar_salas() {
+    public static String Listar_salas() {
+        StringBuilder salasString = new StringBuilder("SALAS");
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            String salas = "SELECT room_name FROM chat;";
+            String salas = "SELECT room_name FROM CHAT;";
             Statement stmt = adminConn.createStatement();
             ResultSet rs = stmt.executeQuery(salas);
 
             while (rs.next()) {
                 String roomName = rs.getString("room_name");
-                System.out.println("Room Name: " + roomName);
+                salasString.append(" ").append(roomName);
             }
         } catch(SQLException e){
-                e.printStackTrace();
-            }
+            e.printStackTrace();
+        }
+        return salasString.toString();
     }
 
     public static void Criar_sala(String username, String room_name, String senha, boolean isPrivate) {
@@ -55,17 +45,26 @@ public class Client_roommanager {
         String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('"+ username + "', '" + room_name + "');";
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            String SenhaEqual = "SELECT * FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+            String SenhaEqual = "SELECT senha, isprivate FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(SenhaEqual)) {
 
                 if (rs.next()) {
                     boolean isPrivate = rs.getBoolean("isPrivate");
-
+                    List<String> Listusuarios = new ArrayList<>();
                     if (!isPrivate) {
                         stmt.executeUpdate(insertQuery);
-                        System.out.println("Entrou na sala");
-                        return "ENTRAR_SALA_OK";
+                        String usuarios = "SELECT username FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
+
+                        try (Statement stmtt = adminConn.createStatement();
+                             ResultSet rss = stmtt.executeQuery(usuarios)) {
+                            String user = rss.getString("room_name");
+                            Listusuarios.add(user);
+                            return "ENTRAR_SALA_OK" + Listusuarios;
+                        }catch (SQLException e) {
+                            e.printStackTrace();
+                            return "ERRO Ocorreu um erro na entrada de sala";
+                        }
                     }
 
                     String equal = rs.getString("senha");
@@ -78,8 +77,14 @@ public class Client_roommanager {
                     }
 
                     stmt.executeUpdate(insertQuery);
-                    System.out.println("Entrou na sala");
-                    return "ENTRAR_SALA_OK";
+                    String usuarios = "SELECT username FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
+                    Listusuarios = new ArrayList<>();
+                    try (Statement stmtt = adminConn.createStatement();
+                         ResultSet rss = stmtt.executeQuery(usuarios)) {
+                        String user = rss.getString("room_name");
+                        Listusuarios.add(user);
+                        return "ENTRAR_SALA_OK" + Listusuarios;
+                    }
                 }
 
                 return "ERRO Sala não existe";
@@ -92,49 +97,70 @@ public class Client_roommanager {
         }
     }
 
-    public static void Saida_sala (String username, String room_name){
-        String deletQuery;
+    public static String Saida_sala (String username, String room_name){
         try {
             Connection adminConn = DatabaseConfig.getConnection();
+            String salaexist = "SELECT room_name FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
             String isadmin = "SELECT administrador FROM CHAT WHERE USERNAME = '" + username + "' AND ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
-                 ResultSet rs = stmt.executeQuery(isadmin)) {
+                 ResultSet rs = stmt.executeQuery(salaexist)) {
 
                 if (rs.next()) {
-                    String admin = rs.getString("administrador");
-                    if (!admin.equals(username)) {
-                        deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = " + room_name + "';";
-
-                    } else {
-                        deletQuery = "DELETE CASCADE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                    try (Statement stmtt= adminConn.createStatement();
+                         ResultSet rss = stmtt.executeQuery(isadmin)){
+                        if (rss.next()) {
+                            String admin = rs.getString("administrador");
+                            if (!admin.equals(username)) {
+                                String deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = " + room_name + "';";
+                                stmt.executeUpdate(deletQuery);
+                                return "SAIR_SALA_OK";
+                            } else {
+                                String deletQuery = "DELETE CASCADE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                                stmt.executeUpdate(deletQuery);
+                                return "FECHAR_SALA_OK";
+                            }
+                        }
                     }
-                    stmt.executeUpdate(deletQuery);
                 }
+            } catch (SQLException e) {
+                return "ERRO Sala não existe";
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return "ERRO Conexão não estabelicida";
         }
+        return "ERRO";
     }
 
-    public static void bane_user(String username_admin, String room_name, String username){
+    public static String bane_user(String username_admin, String room_name, String username){
         String deletQuery;
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            String isadmin = "SELECT administrador FROM CHAT WHERE USERNAME = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
+            String isIn = "SELECT username FROM CLIENT_ROOM WHERE USERNAME = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
-                 ResultSet rs = stmt.executeQuery(isadmin)) {
+                 ResultSet rs = stmt.executeQuery(isIn)) {
 
-                if (rs.next()) {
-                    String admin = rs.getString("administrador");
-                    if (!admin.equals(username_admin)) {
-                        System.out.println("Usuário não tem permissão para realizar essa ação");
-                    } else {
-                        deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = " + room_name + "';";
+                if(rs.next()){
+
+                    String isadmin = "SELECT administrador FROM CHAT WHERE USERNAME = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
+
+
+                    try (Statement stmtt = adminConn.createStatement();
+                         ResultSet rss = stmtt.executeQuery(isadmin)) {
+
+                        if (rss.next()) {
+                            String admin = rss.getString("administrador");
+                            if (!admin.equals(username_admin)) {
+                                return "ERRO Usuário não tem permissão para realizar essa ação";
+                            } else {
+                                deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = " + room_name + "';";
+                                return "BANIMENTO_OK " + username;
+                            }
+                        }
                     }
-                }
-            }
-        } catch (SQLException e) {
+                } else{
+                    return "ERRO USUARIO NÃO ESTÁ NA SALA";
+                }}}catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-    }
+        return "ERRO Desconhecido";
+    }}

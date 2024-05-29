@@ -52,7 +52,6 @@ class ClientHandler implements Runnable {
     private final BufferedReader reader;
     private final PrintWriter writer;
     private String username = "";
-    private boolean authenticated = false;
     private Authenticator authenticator;
 
     public ClientHandler(Socket clientSocket, Authenticator authenticator) throws IOException {
@@ -82,32 +81,29 @@ class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Error handling client connection: " + e.getMessage());
         } finally {
-            closeSocket();
+            closeClient();
         }
     }
 
-    private void closeSocket() {
+    public void closeClient() {
         try {
             System.out.println("Closing connection");
             reader.close();
             writer.close();
             clientSocket.close();
+//            Client_roommanager.
         } catch (IOException e) {
             System.err.println("Error closing client connection: " + e.getMessage());
         }
     }
 
     public void sendMessage(String message) {
-        try {
-            String encryptedMessage = authenticator.EncryptMessage(message);
-            writer.println(encryptedMessage);
-            System.out.printf("Sending message to %s: %s\n", username, message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String encryptedMessage = authenticator.EncryptMessage(message);
+        writer.println(encryptedMessage);
+        System.out.printf("Sending message to %s: %s\n", username, message);
     }
 
-    private void unsafeMessage(String message) {
+    public void unsafeMessage(String message) {
         writer.println(message);
         System.out.printf("Sending unsafe message to %s: %s\n", username, message);
     }
@@ -146,23 +142,27 @@ class ClientHandler implements Runnable {
             String[] parsedRequest = request.split(" ");
 
             if (parsedRequest.length != 2) {
+                System.err.println("Invalid request size: " + request);
+                closeClient();
                 return;
             }
             if (!parsedRequest[0].equals("AUTENTICACAO")) {
+                System.err.println("Invalid request: " + request);
+                closeClient();
                 return;
             }
 
             if (!parsedRequest[1].equals(username)) {
+                System.err.println("Invalid username: " + request);
+                closeClient();
                 return;
             }
 
             unsafeMessage(authenticator.SendPublicKey());
 
             String encryptedSKey = reader.readLine();
-
             if (!authenticator.DecryptSimetricKey(encryptedSKey)) {
-                System.err.println("Falha ao criar chave");
-                closeSocket();
+                closeClient();
             }
         }
         catch (Exception e) {
@@ -170,17 +170,10 @@ class ClientHandler implements Runnable {
         }
     }
 
-    private void handleMessage(String message) {
-        String decryptedMessage = "";
-        try {
-            decryptedMessage = authenticator.DecryptMessage(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-            closeSocket();
-        }
-
-        System.out.println("Mensagem recebida de " + username + ": " + decryptedMessage);
-        String[] parsedMessage = decryptedMessage.split(" ", 2);
+    private void handleMessage(String encryptedMessage) {
+        String message = authenticator.DecryptMessage(encryptedMessage);
+        System.out.println("Mensagem recebida: " + message);
+        String[] parsedMessage = message.split(" ", 2);
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
             try {
@@ -245,7 +238,7 @@ class ClientHandler implements Runnable {
                 sendMessage("CRIAR_SALA_OK");
             } catch (Exception e) {
                 System.err.println(e);
-                sendMessage("já é 22:32 e nem sei mais oq eu to fazendo");
+                sendMessage("ERRO Problema ao criar sala");
             }
             return;
         }
