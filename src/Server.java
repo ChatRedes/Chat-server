@@ -27,6 +27,10 @@ public class Server {
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server is listening on port " + PORT);
+            String apaga = "DELETE FROM CLIENT_ROOM; DELETE FROM CHAT; DELETE FROM CLIENT";
+            Connection adminConn = DatabaseConfig.getConnection();
+            Statement stmt = adminConn.createStatement();
+            stmt.executeUpdate(apaga);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -36,7 +40,7 @@ public class Server {
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             System.err.println("Error starting server: " + e.getMessage());
         }
     }

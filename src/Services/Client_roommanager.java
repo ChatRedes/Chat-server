@@ -51,6 +51,13 @@ public class Client_roommanager {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
             String SenhaEqual = "SELECT senha, isprivate FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+            String pertencente = "SELECT username FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "' AND USERNAME = '" + username + "';";
+            try (Statement stm = adminConn.createStatement();
+                ResultSet pt = stm.executeQuery(pertencente)){
+                if(pt.next()){
+                    return "ERRO Usuário já está na sala";
+                }
+            }
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(SenhaEqual)) {
 
@@ -122,8 +129,8 @@ public class Client_roommanager {
                             } else {
                                 String deletQuery = "DELETE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
                                 String deletclient = "DELETE FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
-                                stmt.executeUpdate(deletQuery);
                                 stmt.executeUpdate(deletclient);
+                                stmt.executeUpdate(deletQuery);
                                 return "FECHAR_SALA_OK";
                             }
                         }
@@ -179,7 +186,6 @@ public class Client_roommanager {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
 
-            String deletCR = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "';";
             String deletClient = "DELETE FROM CLIENT WHERE USERNAME = '" + username + "';";
             String adm = "SELECT room_name FROM CHAT WHERE administrador = '" + username + "';";
 
@@ -190,7 +196,6 @@ public class Client_roommanager {
                     String sala = rs.getString("room_name");
                     Saida_sala(username, sala);
                 }
-                stmt.executeUpdate(deletCR);
                 stmt.executeUpdate(deletClient);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
