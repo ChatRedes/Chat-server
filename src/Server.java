@@ -1,4 +1,6 @@
+import Util.Authenticator;
 import Util.DatabaseConfig;
+import Util.ServerCripto;
 
 import Services.*;
 
@@ -12,41 +14,14 @@ public class Server {
     private static final int PORT = 8080;
     static List<ClientHandler> clients = new ArrayList<>();
     private Dotenv envVariables;
+    private ServerCripto keyGenerator;
 
     public static void main(String[] args) {
         Server server = new Server();
         DatabaseConfig.StartDatabase();
+        server.keyGenerator = new ServerCripto();
 
         server.start();
-    }
-
-    private void getDotEnv() {
-        Dotenv dotenv = Dotenv.load();
-        String env = dotenv.get("testing");
-        System.out.println(env);
-
-        envVariables = dotenv;
-    }
-
-    private Connection conectWithDatabase() {
-        try {
-            String host = envVariables.get("HOST");
-            String port = envVariables.get("PORT");
-            String database = envVariables.get("DATABASE");
-            String url = "jdbc:postgresql://" + host + ":" + port + "/" + database;
-            System.out.println(url);
-
-            Properties props = new Properties();
-            props.setProperty("user", envVariables.get("USER"));
-            props.setProperty("password", envVariables.get("PASSWORD"));
-            Connection conn = DriverManager.getConnection(url, props);
-
-            return conn;
-        } catch (SQLException e) {
-            // Erro caso haja problemas para se conectar ao banco de dados
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public void start() {
@@ -55,7 +30,8 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                Authenticator auth = new Authenticator(keyGenerator.privateKey, keyGenerator.publicKey);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, auth);
                 clients.add(clientHandler);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
@@ -77,11 +53,14 @@ class ClientHandler implements Runnable {
     private final BufferedReader reader;
     private final PrintWriter writer;
     private String username = "";
+    private boolean authenticated = false;
+    private Authenticator authenticator;
 
-    public ClientHandler(Socket clientSocket) throws IOException {
+    public ClientHandler(Socket clientSocket, Authenticator authenticator) throws IOException {
         this.clientSocket = clientSocket;
         this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         this.writer = new PrintWriter(clientSocket.getOutputStream(), true);
+        this.authenticator = authenticator;
     }
 
     @Override
@@ -92,9 +71,12 @@ class ClientHandler implements Runnable {
                 handleRegister(clientName);
             }
 
+            while (!authenticated) {
+                authenticateClient();
+            }
+
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
-                System.out.println("Chegou aqui");
                 handleMessage(clientMessage);
             }
             System.out.println("Client disconnected");
@@ -144,6 +126,36 @@ class ClientHandler implements Runnable {
 
         result = "ERRO mensagem não reconhecida ou permissão não concedida";
         sendMessage(result);
+    }
+
+    private void authenticateClient() {
+        try {
+            String request = reader.readLine();
+            String[] parsedRequest = request.split(" ");
+
+            if (parsedRequest.length != 2) {
+                System.err.println("Invalid request size: " + request);
+                return;
+            }
+
+            if (!parsedRequest[0].equals("AUTENTICACAO")) {
+                System.err.println("Invalid request: " + request);
+                return;
+            }
+
+            if (!parsedRequest[1].equals(username)) {
+                System.err.println("Invalid username: " + request);
+                return;
+            }
+
+            sendMessage(authenticator.SendPublicKey());
+
+            String encryptedSKey = reader.readLine();
+            authenticator.DecryptSimetricKey(encryptedSKey);
+        }
+        catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     private void handleMessage(String message) {
