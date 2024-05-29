@@ -119,8 +119,10 @@ public class Client_roommanager {
                                 stmt.executeUpdate(deletQuery);
                                 return "SAIR_SALA_OK";
                             } else {
-                                String deletQuery = "DELETE CASCADE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                                String deletQuery = "DELETE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                                String deletclient = "DELETE FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
                                 stmt.executeUpdate(deletQuery);
+                                stmt.executeUpdate(deletclient);
                                 return "FECHAR_SALA_OK";
                             }
                         }
