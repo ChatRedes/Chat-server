@@ -40,8 +40,8 @@ public class Authenticator {
                 return false;
             }
 
-            if (parsedKey[0] != "CHAVE_SIMETRICA") {
-                System.err.println("Request incorreto");
+            if (!parsedKey[0].equals("CHAVE_SIMETRICA")) {
+                System.err.println("Request incorreto: " +sKeyMessage);
                 return false;
             }
 
@@ -55,7 +55,7 @@ public class Authenticator {
         }
     }
 
-    public String DecryptMessage(String message) throws Exception {
+    public String DecryptMessage(String message) {
         try {
             byte[] messageBytes = Base64.getDecoder().decode(message);
             Cipher cipher = Cipher.getInstance("AES");
@@ -64,8 +64,23 @@ public class Authenticator {
             return new String(decryptedMessageBytes);
         } catch (Exception e) {
             e.printStackTrace();
-            return "ERRO: Falha ao desencripitar a mensagem";
+            return "ERRO Falha ao decripitar a mensagem";
 
+        }
+    }
+
+    public String EncryptMessage(String message) {
+        try {
+            Cipher cif = Cipher.getInstance("AES");
+            cif.init(Cipher.ENCRYPT_MODE, this.aesKey);
+
+            byte[] buffer = cif.doFinal(message.getBytes());
+            String encryptedMessage = Base64.getEncoder().encodeToString(buffer);
+
+            return encryptedMessage;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERRO erro ao enviar mensagem";
         }
     }
 }

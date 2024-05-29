@@ -92,12 +92,19 @@ class ClientHandler implements Runnable {
             reader.close();
             writer.close();
             clientSocket.close();
+//            Client_roommanager.
         } catch (IOException e) {
             System.err.println("Error closing client connection: " + e.getMessage());
         }
     }
 
     public void sendMessage(String message) {
+        String encryptedMessage = authenticator.EncryptMessage(message);
+        writer.println(encryptedMessage);
+        System.out.printf("Sending message to %s: %s\n", username, message);
+    }
+
+    public void unsafeMessage(String message) {
         writer.println(message);
         System.out.printf("Sending message to %s: %s\n", username, message);
     }
@@ -107,7 +114,7 @@ class ClientHandler implements Runnable {
         String result;
 
         if (parsedMessage.length != 2) {
-            sendMessage("ERRO Numero de parametros enviados incorretos");
+            unsafeMessage("ERRO Numero de parametros enviados incorretos");
             return;
         }
 
@@ -115,19 +122,19 @@ class ClientHandler implements Runnable {
             try
             {
                 result = Register_client.insertClient(parsedMessage[1], this.clientSocket);
-                sendMessage(result);
+                unsafeMessage(result);
                 if (result.equals("REGISTRO_OK")) {
                     username = parsedMessage[1];
                 }
                 return;
             } catch (Exception e)
             {
-                sendMessage("ERRO Ocorreu um erro ao registrar o cliente");
+                unsafeMessage("ERRO Ocorreu um erro ao registrar o cliente");
             }
         }
 
         result = "ERRO mensagem não reconhecida ou permissão não concedida";
-        sendMessage(result);
+        unsafeMessage(result);
     }
 
     private void authenticateClient() {
@@ -153,7 +160,7 @@ class ClientHandler implements Runnable {
                 return;
             }
 
-            sendMessage(authenticator.SendPublicKey());
+            unsafeMessage(authenticator.SendPublicKey());
 
             String encryptedSKey = reader.readLine();
             if (!authenticator.DecryptSimetricKey(encryptedSKey)) {
@@ -165,7 +172,8 @@ class ClientHandler implements Runnable {
         }
     }
 
-    private void handleMessage(String message) {
+    private void handleMessage(String encryptedMessage) {
+        String message = authenticator.DecryptMessage(encryptedMessage);
         System.out.println("Mensagem recebida: " + message);
         String[] parsedMessage = message.split(" ", 2);
 
@@ -232,7 +240,7 @@ class ClientHandler implements Runnable {
                 sendMessage("CRIAR_SALA_OK");
             } catch (Exception e) {
                 System.err.println(e);
-                sendMessage("já é 22:32 e nem sei mais oq eu to fazendo");
+                sendMessage("ERRO Problema ao criar sala");
             }
             return;
         }
