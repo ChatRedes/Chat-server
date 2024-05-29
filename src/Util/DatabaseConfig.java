@@ -35,14 +35,6 @@ public class DatabaseConfig {
     public static void StartDatabase() {
         CreateDatabase();
         CreateTables();
-        DeleteTables();
-    }
-
-    private static void DeleteTables() {
-        deleteTable("client_room");
-        deleteTable("chat");
-        deleteTable("client");
-
     }
 
     private static void CreateDatabase() {
@@ -96,17 +88,5 @@ public class DatabaseConfig {
         String query = "CREATE TABLE IF NOT EXISTS CLIENT_ROOM (id_cliente_room SERIAL PRIMARY KEY, username VARCHAR(255) REFERENCES CLIENT(username), room_name TEXT REFERENCES CHAT(room_name));";
         PreparedStatement st = conn.prepareStatement(query);
         st.executeUpdate();
-    }
-
-
-    private static void deleteTable(String table) {
-        String query = "DELETE FROM " + table + ";";
-        try {
-            Connection adminConn = getAdminConnection();
-            PreparedStatement st = adminConn.prepareStatement(query);
-            st.executeUpdate();
-        } catch (SQLException e) {
-
-        }
     }
 }
