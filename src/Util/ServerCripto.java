@@ -17,7 +17,6 @@ public class ServerCripto {
     public PublicKey publicKey;
 
     public ServerCripto (){
-        System.out.println("Ta vindo aqui");
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(1024);
