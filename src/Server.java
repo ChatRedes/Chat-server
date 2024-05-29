@@ -202,8 +202,10 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
             try {
-                String roomName = parsedMessage[1];
-                String messageContent = parsedMessage[2];
+                String[] vamo = parsedMessage[1].split(" ",2);
+                System.out.println(parsedMessage[1]);
+                String roomName = vamo[0];
+                String messageContent = vamo[1];
                 List<String> participants = Messages_handler.pegar_os_participantes(roomName);
                 for (ClientHandler client : Server.clients) {
                     if (participants.contains(username)) {
@@ -211,6 +213,7 @@ class ClientHandler implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 sendMessage("erro");
             }
             return;
