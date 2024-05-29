@@ -93,7 +93,7 @@ class ClientHandler implements Runnable {
             reader.close();
             writer.close();
             clientSocket.close();
-//            Client_roommanager.
+            Client_roommanager.remove_user_database(username);
         } catch (IOException e) {
             System.err.println("Error closing client connection: " + e.getMessage());
         }
@@ -215,7 +215,6 @@ class ClientHandler implements Runnable {
             }
             return;
         }
-
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
             try {

@@ -173,7 +173,7 @@ public class Client_roommanager {
         return "ERRO Desconhecido";
     }
 
-    public static void remove_user_database(String username) throws SQLException {
+    public static void remove_user_database(String username) {
         try {
             Connection adminConn = DatabaseConfig.getConnection();
 
