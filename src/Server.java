@@ -276,20 +276,26 @@ class ClientHandler implements Runnable {
 
                 return;
             } catch (Exception e) {
-                sendMessage("deu ruim");
+                e.printStackTrace();
+                sendMessage("ERRO Erro ao sair da sala");
             }
             return;
         }
 
         if (parsedMessage[0].equals("BANIR_USUARIO")) {
             try {
-                String roomName = parsedMessage[1];
-                String usernameToBan = parsedMessage[2];
+                String[] params = parsedMessage[1].split(" ");
+                if (params.length != 2) {
+                    sendMessage("ERRO Um erro na mensagem impossibilitou a requisição");
+                }
+                String roomName = params[0];
+                String usernameToBan = params[1];
                 String usernameAdmin = this.username;
-                Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
-                sendMessage("BANIR_USUARIO_OK");
+                String result= Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
+                sendMessage(result);
             } catch (Exception e) {
-                sendMessage("deu ruim");
+                e.printStackTrace();
+                sendMessage("ERRO Erro ao banir usuário");
             }
             return;
         }

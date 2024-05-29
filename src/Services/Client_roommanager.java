@@ -70,6 +70,7 @@ public class Client_roommanager {
 
                         try (Statement stmtt = adminConn.createStatement();
                              ResultSet rss = stmtt.executeQuery(usuarios)) {
+                            rss.next();
                             String user = rss.getString("room_name");
                             Listusuarios.add(user);
                             return "ENTRAR_SALA_OK" + Listusuarios;
@@ -95,7 +96,7 @@ public class Client_roommanager {
                          ResultSet rss = stmtt.executeQuery(usuarios)) {
                         String user = rss.getString("room_name");
                         Listusuarios.add(user);
-                        return "ENTRAR_SALA_OK" + Listusuarios;
+                        return "ENTRAR_SALA_OK " + Listusuarios;
                     }
                 }
 
@@ -156,7 +157,7 @@ public class Client_roommanager {
 
                 if (rs.next()) {
 
-                    String isadmin = "SELECT administrador FROM CHAT WHERE USERNAME = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
+                    String isadmin = "SELECT administrador FROM CHAT WHERE ADMINISTRADOR = '" + username_admin + "' AND ROOM_NAME = '" + room_name + "';";
 
 
                     try (Statement stmtt = adminConn.createStatement();
