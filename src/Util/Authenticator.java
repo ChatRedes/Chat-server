@@ -24,20 +24,35 @@ public class Authenticator {
         return messageToClient;
     }
 
-    public void DecryptSimetricKey(String simetricKey)  {
+    public boolean DecryptSimetricKey(String simetricKey)  {
         try {
             byte[] authRequestBytes = Base64.getDecoder().decode(simetricKey);
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] aesKeyBytes = cipher.doFinal(authRequestBytes);
 
-            this.aesKey = new SecretKeySpec(aesKeyBytes, "AES");
-            this.aesKey.getEncoded();
+            byte[] aesKeyBytes = cipher.doFinal(authRequestBytes);
+            String sKeyMessage = new String(aesKeyBytes);
+            String[] parsedKey = sKeyMessage.split(" ");
+
+            System.out.println(sKeyMessage);
+            if (parsedKey.length != 2) {
+                System.out.println("Tamanho incorreto: " + simetricKey);
+                return false;
+            }
+
+            if (parsedKey[0] != "CHAVE_SIMETRICA") {
+                System.err.println("Request incorreto");
+                return false;
+            }
+
+            byte[] decodedKey = Base64.getDecoder().decode(parsedKey[1]);
+            this.aesKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            return true;
 
         }catch(Exception e) {
             e.printStackTrace();
+            return false;
         }
-
     }
 
     public String DecryptMessage(String message) throws Exception {

@@ -71,9 +71,7 @@ class ClientHandler implements Runnable {
                 handleRegister(clientName);
             }
 
-            while (!authenticated) {
-                authenticateClient();
-            }
+            authenticateClient();
 
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
@@ -84,14 +82,18 @@ class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Error handling client connection: " + e.getMessage());
         } finally {
-            try {
-                System.out.println("Closing connection");
-                reader.close();
-                writer.close();
-                clientSocket.close();
-            } catch (IOException e) {
-                System.err.println("Error closing client connection: " + e.getMessage());
-            }
+            closeClient();
+        }
+    }
+
+    public void closeClient() {
+        try {
+            System.out.println("Closing connection");
+            reader.close();
+            writer.close();
+            clientSocket.close();
+        } catch (IOException e) {
+            System.err.println("Error closing client connection: " + e.getMessage());
         }
     }
 
@@ -135,23 +137,28 @@ class ClientHandler implements Runnable {
 
             if (parsedRequest.length != 2) {
                 System.err.println("Invalid request size: " + request);
+                closeClient();
                 return;
             }
 
             if (!parsedRequest[0].equals("AUTENTICACAO")) {
                 System.err.println("Invalid request: " + request);
+                closeClient();
                 return;
             }
 
             if (!parsedRequest[1].equals(username)) {
                 System.err.println("Invalid username: " + request);
+                closeClient();
                 return;
             }
 
             sendMessage(authenticator.SendPublicKey());
 
             String encryptedSKey = reader.readLine();
-            authenticator.DecryptSimetricKey(encryptedSKey);
+            if (!authenticator.DecryptSimetricKey(encryptedSKey)) {
+                closeClient();
+            }
         }
         catch (Exception e) {
             System.err.println(e);
