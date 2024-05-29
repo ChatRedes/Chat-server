@@ -218,7 +218,7 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
             try {
-                String[] paramethers = parsedMessage[1].split(" ", 2);
+                String[] paramethers = parsedMessage[1].split(" ");
                 String roomName = paramethers[1];
                 System.out.println("Criando sala " + roomName);
                 String username = this.username;
