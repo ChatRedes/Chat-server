@@ -94,8 +94,8 @@ public class Client_roommanager {
                     Listusuarios = new ArrayList<>();
                     try (Statement stmtt = adminConn.createStatement();
                          ResultSet rss = stmtt.executeQuery(usuarios)) {
-                        String user = rss.getString("room_name");
-                        Listusuarios.add(user);
+                        //String user = rss.getString("room_name");
+                        //Listusuarios.add(user);
                         return "ENTRAR_SALA_OK " + Listusuarios;
                     }
                 }
@@ -134,9 +134,15 @@ public class Client_roommanager {
                                 stmt.executeUpdate(deletQuery);
                                 return "FECHAR_SALA_OK";
                             }
+
                         }
+                        return "oi";
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        return "ERRO Sala não existe";
                     }
                 }
+                return "sim";
             } catch (SQLException e) {
                 e.printStackTrace();
                 return "ERRO Sala não existe";
@@ -144,7 +150,6 @@ public class Client_roommanager {
         } catch (SQLException e) {
             return "ERRO Conexão não estabelicida";
         }
-        return "ERRO";
     }
 
     public static String bane_user(String username_admin, String room_name, String username) {
@@ -168,19 +173,25 @@ public class Client_roommanager {
                             if (!admin.equals(username_admin)) {
                                 return "ERRO Usuário não tem permissão para realizar essa ação";
                             } else {
-                                deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = " + room_name + "';";
+                                deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = '" + room_name + "';";
+                                stmtt.executeUpdate(deletQuery);
                                 return "BANIMENTO_OK " + username;
                             }
+
                         }
+                        return "ERRO não conseguiu conectar com o banco";
                     }
                 } else {
                     return "ERRO USUARIO NÃO ESTÁ NA SALA";
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return "ERRO não conseguiu executar o select";
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return "ERRO não conseguiu conectar com o banco";
         }
-        return "ERRO Desconhecido";
     }
 
     public static void remove_user_database(String username) {
