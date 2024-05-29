@@ -56,6 +56,7 @@ class ClientHandler implements Runnable {
     private boolean authenticated = false;
     private Authenticator authenticator;
 
+
     public ClientHandler(Socket clientSocket, Authenticator authenticator) throws IOException {
         this.clientSocket = clientSocket;
         this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -200,19 +201,19 @@ class ClientHandler implements Runnable {
         }
 
         if (parsedMessage[0].equals("ENVIAR_MENSAGEM")) {
-//            try {
-//                String roomName = parsedMessage[1];
-//                String messageContent = parsedMessage[2];
-//                List<String> participants = Messages_handler.pegar_os_participantes(roomName);
-//                for (ClientHandler client : Server.clients) {
-//                    if (participants.contains(client.getUsername())) {
-//                        client.sendMessage(messageContent);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                sendMessage("erro");
-//            }
-//            return;
+            try {
+                String roomName = parsedMessage[1];
+                String messageContent = parsedMessage[2];
+                List<String> participants = Messages_handler.pegar_os_participantes(roomName);
+                for (ClientHandler client : Server.clients) {
+                    if (participants.contains(username)) {
+                        client.sendMessage(messageContent);
+                    }
+                }
+            } catch (Exception e) {
+                sendMessage("erro");
+            }
+            return;
         }
 
 
@@ -273,4 +274,5 @@ class ClientHandler implements Runnable {
         String result = "ERRO mensagem não reconhecida";
         sendMessage(result);
     }
+
 }
