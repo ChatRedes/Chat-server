@@ -13,7 +13,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class Server {
     private static final int PORT = 8080;
     static List<ClientHandler> clients = new ArrayList<>();
-    private Dotenv envVariables;
     private ServerCripto keyGenerator;
 
     public static void main(String[] args) {
@@ -69,35 +68,48 @@ class ClientHandler implements Runnable {
             while (username.equals("")) {
                 String clientName = reader.readLine();
                 handleRegister(clientName);
+                System.out.println("Client registered " + username);
             }
 
-            while (!authenticated) {
-                authenticateClient();
-            }
+            authenticateClient();
 
             String clientMessage;
             while ((clientMessage = reader.readLine()) != null) {
                 handleMessage(clientMessage);
             }
-            System.out.println("Client disconnected");
+            System.out.println("Client " + username + " disconnected");
 
         } catch (IOException e) {
             System.err.println("Error handling client connection: " + e.getMessage());
         } finally {
-            try {
-                System.out.println("Closing connection");
-                reader.close();
-                writer.close();
-                clientSocket.close();
-            } catch (IOException e) {
-                System.err.println("Error closing client connection: " + e.getMessage());
-            }
+            closeSocket();
+        }
+    }
+
+    private void closeSocket() {
+        try {
+            System.out.println("Closing connection");
+            reader.close();
+            writer.close();
+            clientSocket.close();
+        } catch (IOException e) {
+            System.err.println("Error closing client connection: " + e.getMessage());
         }
     }
 
     public void sendMessage(String message) {
+        try {
+            String encryptedMessage = authenticator.EncryptMessage(message);
+            writer.println(encryptedMessage);
+            System.out.printf("Sending message to %s: %s\n", username, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void unsafeMessage(String message) {
         writer.println(message);
-        System.out.printf("Sending message to %s: %s\n", username, message);
+        System.out.printf("Sending unsafe message to %s: %s\n", username, message);
     }
 
     private void handleRegister(String message) {
@@ -105,7 +117,7 @@ class ClientHandler implements Runnable {
         String result;
 
         if (parsedMessage.length != 2) {
-            sendMessage("ERRO Numero de parametros enviados incorretos");
+            unsafeMessage("ERRO Numero de parametros enviados incorretos");
             return;
         }
 
@@ -113,19 +125,19 @@ class ClientHandler implements Runnable {
             try
             {
                 result = Register_client.insertClient(parsedMessage[1], this.clientSocket);
-                sendMessage(result);
+                unsafeMessage(result);
                 if (result.equals("REGISTRO_OK")) {
                     username = parsedMessage[1];
                 }
                 return;
             } catch (Exception e)
             {
-                sendMessage("ERRO Ocorreu um erro ao registrar o cliente");
+                unsafeMessage("ERRO Ocorreu um erro ao registrar o cliente");
             }
         }
 
         result = "ERRO mensagem não reconhecida ou permissão não concedida";
-        sendMessage(result);
+        unsafeMessage(result);
     }
 
     private void authenticateClient() {
@@ -134,24 +146,24 @@ class ClientHandler implements Runnable {
             String[] parsedRequest = request.split(" ");
 
             if (parsedRequest.length != 2) {
-                System.err.println("Invalid request size: " + request);
                 return;
             }
-
             if (!parsedRequest[0].equals("AUTENTICACAO")) {
-                System.err.println("Invalid request: " + request);
                 return;
             }
 
             if (!parsedRequest[1].equals(username)) {
-                System.err.println("Invalid username: " + request);
                 return;
             }
 
-            sendMessage(authenticator.SendPublicKey());
+            unsafeMessage(authenticator.SendPublicKey());
 
             String encryptedSKey = reader.readLine();
-            authenticator.DecryptSimetricKey(encryptedSKey);
+
+            if (!authenticator.DecryptSimetricKey(encryptedSKey)) {
+                System.err.println("Falha ao criar chave");
+                closeSocket();
+            }
         }
         catch (Exception e) {
             System.err.println(e);
@@ -159,8 +171,16 @@ class ClientHandler implements Runnable {
     }
 
     private void handleMessage(String message) {
-        System.out.println("Mensagem recebida: " + message);
-        String[] parsedMessage = message.split(" ", 2);
+        String decryptedMessage = "";
+        try {
+            decryptedMessage = authenticator.DecryptMessage(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            closeSocket();
+        }
+
+        System.out.println("Mensagem recebida de " + username + ": " + decryptedMessage);
+        String[] parsedMessage = decryptedMessage.split(" ", 2);
 
         if (parsedMessage[0].equals("LISTAR_SALAS")) {
             try {
@@ -203,7 +223,7 @@ class ClientHandler implements Runnable {
 
         if (parsedMessage[0].equals("CRIAR_SALA")) {
             try {
-                String[] paramethers = parsedMessage[1].split(" ", 2);
+                String[] paramethers = parsedMessage[1].split(" ");
                 String roomName = paramethers[1];
                 System.out.println("Criando sala " + roomName);
                 String username = this.username;

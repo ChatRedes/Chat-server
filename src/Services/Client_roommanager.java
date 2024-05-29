@@ -55,7 +55,7 @@ public class Client_roommanager {
         String insertQuery = "INSERT INTO CLIENT_ROOM (username, room_name) VALUES ('"+ username + "', '" + room_name + "');";
         try {
             Connection adminConn = DatabaseConfig.getConnection();
-            String SenhaEqual = "SELECT senha FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+            String SenhaEqual = "SELECT * FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(SenhaEqual)) {
 
@@ -64,6 +64,7 @@ public class Client_roommanager {
 
                     if (!isPrivate) {
                         stmt.executeUpdate(insertQuery);
+                        System.out.println("Entrou na sala");
                         return "ENTRAR_SALA_OK";
                     }
 
@@ -77,6 +78,7 @@ public class Client_roommanager {
                     }
 
                     stmt.executeUpdate(insertQuery);
+                    System.out.println("Entrou na sala");
                     return "ENTRAR_SALA_OK";
                 }
 
