@@ -18,8 +18,8 @@ public class DatabaseConfig {
 
         url = "jdbc:postgresql://" + host + ":" + port + "/";
         database = dotenv.get("DATABASE").toLowerCase();
-        user = dotenv.get("USER");
-        password = dotenv.get("PASSWORD");
+        user = "postgres";
+        password = "redes";
     }
 
     public DatabaseConfig () {}
