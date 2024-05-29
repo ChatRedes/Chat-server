@@ -78,7 +78,6 @@ public class Client_roommanager {
 
                     stmt.executeUpdate(insertQuery);
                     return "ENTRAR_SALA_OK";
-
                 }
 
                 return "ERRO Sala não existe";
