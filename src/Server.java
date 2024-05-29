@@ -292,6 +292,13 @@ class ClientHandler implements Runnable {
                 String usernameToBan = params[1];
                 String usernameAdmin = this.username;
                 String result= Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
+
+                List<String> participantes = Messages_handler.pegar_os_participantes(roomName);
+                for (ClientHandler client : Server.clients) {
+                    if (participantes.contains(username)) {
+                        client.sendMessage("BANIU_USUARIO" + " " + usernameToBan);
+                    }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+                }
                 sendMessage(result);
             } catch (Exception e) {
                 e.printStackTrace();

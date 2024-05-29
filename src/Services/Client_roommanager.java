@@ -117,32 +117,28 @@ public class Client_roommanager {
             String isadmin = "SELECT administrador FROM CHAT WHERE ADMINISTRADOR = '" + username + "' AND ROOM_NAME = '" + room_name + "';";
             try (Statement stmt = adminConn.createStatement();
                  ResultSet rs = stmt.executeQuery(salaexist)) {
-
                 if (rs.next()) {
                     try (Statement stmtt = adminConn.createStatement();
                          ResultSet rss = stmtt.executeQuery(isadmin)) {
                         if (rss.next()) {
-                            String admin = rs.getString("administrador");
-                            if (!admin.equals(username)) {
-                                String deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = '" + room_name + "';";
-                                stmt.executeUpdate(deletQuery);
-                                return "SAIR_SALA_OK";
-                            } else {
-                                String deletQuery = "DELETE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
-                                String deletclient = "DELETE FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
-                                stmt.executeUpdate(deletclient);
-                                stmt.executeUpdate(deletQuery);
-                                return "FECHAR_SALA_OK";
-                            }
+                            String deletQuery = "DELETE FROM CHAT WHERE ROOM_NAME = '" + room_name + "';";
+                            String deletclient = "DELETE FROM CLIENT_ROOM WHERE ROOM_NAME = '" + room_name + "';";
+                            stmt.executeUpdate(deletclient);
+                            stmt.executeUpdate(deletQuery);
+                            return "FECHAR_SALA_OK";
 
+
+
+                        }else{
+                            String deletQuery = "DELETE FROM CLIENT_ROOM WHERE USERNAME = '" + username + "' AND ROOM_NAME = '" + room_name + "';";
+                            stmt.executeUpdate(deletQuery);
+                            return "SAIR_SALA_OK";
                         }
-                        return "oi";
                     } catch (SQLException e) {
                         e.printStackTrace();
                         return "ERRO Sala não existe";
                     }
                 }
-                return "sim";
             } catch (SQLException e) {
                 e.printStackTrace();
                 return "ERRO Sala não existe";
@@ -150,6 +146,7 @@ public class Client_roommanager {
         } catch (SQLException e) {
             return "ERRO Conexão não estabelicida";
         }
+        return "ERRO não entrou nos if's";
     }
 
     public static String bane_user(String username_admin, String room_name, String username) {
@@ -199,7 +196,7 @@ public class Client_roommanager {
             Connection adminConn = DatabaseConfig.getConnection();
 
             String deletClient = "DELETE FROM CLIENT WHERE USERNAME = '" + username + "';";
-            String adm = "SELECT room_name FROM CHAT WHERE administrador = '" + username + "';";
+            String adm = "SELECT room_name FROM CLIENT_ROOM WHERE username = '" + username + "';";
 
             Statement stmt = adminConn.createStatement();
 
