@@ -10,22 +10,6 @@ import java.util.List;
 
 public class Messages_handler {
 
-/*    public static void pegar_os_sockets() //ver se vai precisar
-        {
-            try {
-                Connection adminConn = DatabaseConfig.getConnection();
-                String query = "SELECT socket FROM CHAT WHERE username = '" + username + "';";
-                Statement stmt = adminConn.createStatement();
-                ResultSet rs = stmt.executeQuery(query);
-
-                while (rs.next()) {
-                    Socket socket = SocketSerialize.deserializeSocket(rs.getString("socket"));
-                }
-            } catch (SQLException | IOException e) {
-                e.printStackTrace();
-            }
-        }*/
-
         public static List<String> pegar_os_participantes(String roomName) {
             List<String> participants = new ArrayList<>();
             try {
@@ -43,4 +27,23 @@ public class Messages_handler {
             }
             return participants;
         }
+
+    public static String pegar_banidos(String username) {
+        String participante = "";
+        try {
+            Connection adminConn = DatabaseConfig.getConnection();
+            String usernamesQuery = "SELECT username FROM CLIENT WHERE username = ?";
+            PreparedStatement stmt = adminConn.prepareStatement(usernamesQuery);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                participante=(rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            participante = "";
+            e.printStackTrace();
+        }
+        return participante;
+    }
 }

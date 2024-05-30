@@ -203,7 +203,7 @@ class ClientHandler implements Runnable {
             String messageContentO = "ENTROU " + roomname + " " + username + " ";
             List<String> participantes = Messages_handler.pegar_os_participantes(roomname);
             for (ClientHandler client : Server.clients) {
-                if (participantes.contains(username)) {
+                if (participantes.contains(client.username)) {
                     client.sendMessage(messageContentO);
                 }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
 
@@ -220,7 +220,7 @@ class ClientHandler implements Runnable {
                 String messageContent = "MENSAGEM " + roomName + " " + username + " "  + vamo[1];
                 List<String> participants = Messages_handler.pegar_os_participantes(roomName);
                 for (ClientHandler client : Server.clients) {
-                    if (participants.contains(username)) {
+                    if (participants.contains(client.username)) {
                         client.sendMessage(messageContent);
                     }
                 }
@@ -267,7 +267,7 @@ class ClientHandler implements Runnable {
                 String messageContenti = "SAIU " + roomName + " " + username;
                 List<String> participantes = Messages_handler.pegar_os_participantes(roomName);
                 for (ClientHandler client : Server.clients) {
-                    if (participantes.contains(username)) {
+                    if (participantes.contains(client.username)) {
                         client.sendMessage(messageContenti);
                     }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
                 }
@@ -293,11 +293,16 @@ class ClientHandler implements Runnable {
                 String usernameAdmin = this.username;
                 String result= Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
 
-                List<String> participantes = Messages_handler.pegar_os_participantes(roomName);
+                List<String> participantes = Messages_handler.pegar_os_participantes(roomName); //aaaa
+
+                String participante = Messages_handler.pegar_banidos(usernameToBan);
                 for (ClientHandler client : Server.clients) {
-                    if (participantes.contains(username)) {
-                        client.sendMessage("BANIU_USUARIO" + " " + usernameToBan);
+                    if (participante.equals(usernameToBan)) {
+                        client.sendMessage("BANIDO_DA_SALA" + " " + roomName + " " + usernameToBan);
                     }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+                    if (participantes.contains(client.username)){
+                        client.sendMessage("SAIU " + roomName + " " + usernameToBan);
+                    }
                 }
                 sendMessage(result);
             } catch (Exception e) {
