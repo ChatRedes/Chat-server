@@ -199,7 +199,17 @@ class ClientHandler implements Runnable {
             if (params.length == 2) {
                 password = params[1];
             }
+            if (Client_roommanager.isInChat(username, roomname)) {
+                sendMessage("ERRO você já está nesta sala");
+                return;
+            }
             String result = Client_roommanager.Entrada_sala(username, roomname, password);
+
+            String[] parsedResult = result.split(" ");
+            if (parsedResult[0].equals("ERRO")) {
+                sendMessage(result);
+                return;
+            }
             String messageContentO = "ENTROU " + roomname + " " + username + " ";
             List<String> participantes = Messages_handler.pegar_os_participantes(roomname);
             for (ClientHandler client : Server.clients) {
@@ -217,6 +227,10 @@ class ClientHandler implements Runnable {
                 String[] vamo = parsedMessage[1].split(" ",2);
                 System.out.println(parsedMessage[1]);
                 String roomName = vamo[0];
+                if (!Client_roommanager.isInChat(username, roomName)) {
+                    sendMessage("ERRO Você não esta nesta sala");
+                    return;
+                }
                 String messageContent = "MENSAGEM " + roomName + " " + username + " "  + vamo[1];
                 List<String> participants = Messages_handler.pegar_os_participantes(roomName);
                 for (ClientHandler client : Server.clients) {
@@ -293,13 +307,19 @@ class ClientHandler implements Runnable {
                 String usernameAdmin = this.username;
                 String result= Client_roommanager.bane_user(usernameAdmin, roomName, usernameToBan);
 
-                List<String> participantes = Messages_handler.pegar_os_participantes(roomName); //aaaa
+                String[] parsedResult = result.split(" ");
+                if (parsedResult[0].equals("ERRO")) {
+                    sendMessage(result);
+                    return;
+                }
 
-                String participante = Messages_handler.pegar_banidos(usernameToBan);
+                List<String> participantes = Messages_handler.pegar_os_participantes(roomName);
+                String banido = Messages_handler.pegar_banidos(usernameToBan);
                 for (ClientHandler client : Server.clients) {
-                    if (participante.equals(usernameToBan)) {
-                        client.sendMessage("BANIDO_DA_SALA" + " " + roomName + " " + usernameToBan);
-                    }// função de entrar sala deve tratar os possiveis erros no corpo dos parametro bem como outros possiveis erros
+                    if (client.username.equals(banido)) {
+                        client.sendMessage("BANIDO_DA_SALA" + " " + roomName);
+                    }
+
                     if (participantes.contains(client.username)){
                         client.sendMessage("SAIU " + roomName + " " + usernameToBan);
                     }
